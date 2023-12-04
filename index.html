@@ -9,6 +9,12 @@
             text-align: center;
             margin-top: 50px;
             font-family: Arial, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .dark-mode {
+            background-color: #333;
+            color: white;
         }
 
         #textInput {
@@ -18,6 +24,13 @@
             border: 2px solid #ddd;
             border-radius: 5px;
             margin-bottom: 10px;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .dark-mode #textInput {
+            background-color: #555;
+            border-color: #777;
+            color: white;
         }
 
         button {
@@ -29,6 +42,7 @@
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s;
+            margin: 5px;
         }
 
         button:hover {
@@ -39,38 +53,117 @@
             margin-top: 20px;
             border: 1px solid #ddd;
             padding: 10px;
+            transition: border-color 0.3s;
+        }
+
+        .dark-mode #imageBox {
+            border-color: #777;
         }
 
         img {
             max-width: 100%;
             height: auto;
         }
+
+        #darkModeToggle {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        #darkModeToggle svg {
+            fill: #007bff;
+            transition: fill 0.3s;
+        }
+
+        .dark-mode #darkModeToggle svg {
+            fill: white;
+        }
     </style>
 </head>
 <body>
-    <input type="text" id="textInput" placeholder="输入提示词">
-    <button onclick="generateImage()">生成图片</button>
+<!-- <button id="darkModeToggle" onclick="toggleDarkMode()">
+        <svg t="1701693339064" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4369" xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="16"><path d="M1000.22 602.938c-50.549 210.937-240.364 367.729-466.799 367.729-265.098 0-480.001-214.903-480.001-480.001 0-226.431 156.785-416.243 367.716-466.796-56.887 69.198-91.682 157.377-93.367 253.901-3.966 227.193 176.994 414.582 404.186 418.548 101.687 1.775 195.402-33.497 268.265-93.38v0z" fill="#000000" p-id="4370"></path></svg>
+</button> -->
+<button id="darkModeToggle" onclick="toggleDarkMode()">
+    <!-- 夜间模式图标 -->
+    <svg id="darkIcon" style="display: none;" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+        <path d="M1000.22 602.938c-50.549 210.937-240.364 367.729-466.799 367.729-265.098 0-480.001-214.903-480.001-480.001 0-226.431 156.785-416.243 367.716-466.796-56.887 69.198-91.682 157.377-93.367 253.901-3.966 227.193 176.994 414.582 404.186 418.548 101.687 1.775 195.402-33.497 268.265-93.38v0z" fill="#000000" p-id="4370"></path>
+    </svg>
 
-    <div id="imageBox">
-        <img id="outputImage" src="" alt="Generated Image will appear here">
-    </div>
+    <!-- 白天模式图标 -->
+    <svg id="lightIcon" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+        <path d="M1000.22 602.938c-50.549 210.937-240.364 367.729-466.799 367.729-265.098 0-480.001-214.903-480.001-480.001 0-226.431 156.785-416.243 367.716-466.796-56.887 69.198-91.682 157.377-93.367 253.901-3.966 227.193 176.994 414.582 404.186 418.548 101.687 1.775 195.402-33.497 268.265-93.38v0z" fill="#ffffff" p-id="4370"></path>
+    </svg>
+</button>
 
-    <script>
-        function generateImage() {
-            var inputText = document.getElementById('textInput').value;
-            var imageUrl = 'https://text2image.junxinzhang1616.workers.dev';
+<input type="text" id="textInput" placeholder="输入提示词">
+<button id="generateButton" onclick="generateImage()">生成图片</button>
 
-            fetch(imageUrl, {
-                method: 'POST',
-                body: inputText
-            })
+<div id="imageBox">
+    <img id="outputImage" src="" alt="Generated Image will appear here">
+</div>
+
+<script>
+    function generateImage() {
+        var inputText = document.getElementById('textInput').value;
+        var imageUrl = 'https://text2image.junxinzhang1616.workers.dev';
+        var generateButton = document.getElementById('generateButton');
+
+        // 禁用按钮并显示等待消息
+        generateButton.textContent = '正在生成，请稍候...';
+        generateButton.disabled = true;
+
+        fetch(imageUrl, {
+            method: 'POST',
+            body: inputText
+        })
             .then(response => response.blob())
             .then(blob => {
                 var imageUrl = URL.createObjectURL(blob);
                 document.getElementById('outputImage').src = imageUrl;
             })
-            .catch(error => console.error('Error:', error));
+            .catch(error => console.error('Error:', error))
+            .finally(() => {
+                // 请求完成后，重新启用按钮并恢复原始文本
+                generateButton.textContent = '生成图片';
+                generateButton.disabled = false;
+            });
+    }
+
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+        updateDarkModeIcon();
+    }
+
+    function checkDarkModePreference() {
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.body.classList.add('dark-mode');
+        } else {
+            document.body.classList.remove('dark-mode');
         }
-    </script>
+        updateDarkModeIcon();
+    }
+
+    function updateDarkModeIcon() {
+        var darkIcon = document.getElementById('darkIcon');
+        var lightIcon = document.getElementById('lightIcon');
+        if (document.body.classList.contains('dark-mode')) {
+            darkIcon.style.display = 'none';
+            lightIcon.style.display = 'block';
+        } else {
+            darkIcon.style.display = 'block';
+            lightIcon.style.display = 'none';
+        }
+    }
+
+    // 确保在 DOM 完全加载后执行
+    document.addEventListener('DOMContentLoaded', (event) => {
+        checkDarkModePreference();
+    });
+</script>
 </body>
 </html>
