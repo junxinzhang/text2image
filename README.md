@@ -48,4 +48,4 @@
 
 ---
 
-© 2023 [Your Name] - All Rights Reserved.
+© 2023 [Jason Zhang] - All Rights Reserved.
