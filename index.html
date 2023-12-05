@@ -50,11 +50,29 @@
         }
 
         #imageBox {
+            width: 50%;
+            height: 50%;
+            margin: auto;
             margin-top: 20px;
             border: 1px solid #ddd;
             padding: 10px;
-            transition: border-color 0.3s;
+            text-align: center; /* 居中对齐 */
+            min-height: 200px; /* 设置最小高度 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
+
+        #imageBox img {
+            max-width: 90%;
+            max-height: 400px; /* 限制图片最大高度 */
+        }
+
+        #placeholder {
+            color: #999;
+            font-size: 16px;
+        }
+
 
         .dark-mode #imageBox {
             border-color: #777;
@@ -85,9 +103,6 @@
     </style>
 </head>
 <body>
-<!-- <button id="darkModeToggle" onclick="toggleDarkMode()">
-        <svg t="1701693339064" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4369" xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="16"><path d="M1000.22 602.938c-50.549 210.937-240.364 367.729-466.799 367.729-265.098 0-480.001-214.903-480.001-480.001 0-226.431 156.785-416.243 367.716-466.796-56.887 69.198-91.682 157.377-93.367 253.901-3.966 227.193 176.994 414.582 404.186 418.548 101.687 1.775 195.402-33.497 268.265-93.38v0z" fill="#000000" p-id="4370"></path></svg>
-</button> -->
 <button id="darkModeToggle" onclick="toggleDarkMode()">
     <!-- 夜间模式图标 -->
     <svg id="darkIcon" style="display: none;" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
@@ -104,14 +119,18 @@
 <button id="generateButton" onclick="generateImage()">生成图片</button>
 
 <div id="imageBox">
-    <img id="outputImage" src="" alt="Generated Image will appear here">
+    <img id="outputImage" src="" alt="生成的图片将在这里显示" style="display: none;">
+    <p id="placeholder" style="color: #999;">生成的图片将在这里显示</p>
 </div>
+
 
 <script>
     function generateImage() {
         var inputText = document.getElementById('textInput').value;
         var imageUrl = 'https://text2image.junxinzhang1616.workers.dev';
         var generateButton = document.getElementById('generateButton');
+        var outputImage = document.getElementById('outputImage');
+        var placeholder = document.getElementById('placeholder');
 
         // 禁用按钮并显示等待消息
         generateButton.textContent = '正在生成，请稍候...';
@@ -124,15 +143,21 @@
             .then(response => response.blob())
             .then(blob => {
                 var imageUrl = URL.createObjectURL(blob);
-                document.getElementById('outputImage').src = imageUrl;
+                outputImage.src = imageUrl;
+                outputImage.style.display = 'block';
+                placeholder.style.display = 'none'; // 隐藏占位符文本
             })
-            .catch(error => console.error('Error:', error))
+            .catch(error => {
+                console.error('Error:', error);
+                placeholder.textContent = '图片生成失败，请重试'; // 更新错误信息
+            })
             .finally(() => {
                 // 请求完成后，重新启用按钮并恢复原始文本
                 generateButton.textContent = '生成图片';
                 generateButton.disabled = false;
             });
     }
+
 
     function toggleDarkMode() {
         document.body.classList.toggle('dark-mode');
